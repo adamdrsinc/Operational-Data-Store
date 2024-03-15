@@ -89,3 +89,4 @@ class ParseSQL:
         new_df = pd.merge(new_df, ODS.dimProduct_df[['ProductID', 'ProductPrice', 'StoreID']], left_on='ProductID', right_on='ProductID', how='left')
         ODS.factOrder_df = pd.concat([new_df, ODS.factOrder_df])
         #print(ODS.factOrder_df.head().to_string())
+#wofjnw
