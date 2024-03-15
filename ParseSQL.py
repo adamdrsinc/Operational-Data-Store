@@ -1,6 +1,7 @@
 import pyodbc as pdbc
 import pandas as pd
 from ODS import ODS
+from DateHelper import DateHelper
 
 
 class ParseSQL:
@@ -25,40 +26,30 @@ class ParseSQL:
 
     def parseDates(self):
         print("\tParsing SQL Dates")
-        dates_df = pd.read_sql_query("SELECT DateOfSale FROM InternetSale", self.conn)
-        dates_df['FullDate'] = pd.to_datetime(dates_df['DateOfSale'])
-        dates_df['DateID'] = dates_df['FullDate'].dt.strftime('%Y%m%d')
-        dates_df['Day'] = dates_df['FullDate'].dt.strftime('%A')
-        dates_df['Month'] = dates_df['FullDate'].dt.strftime('%B')
-        dates_df['Year'] = dates_df['FullDate'].dt.strftime('%Y')
-        dates_df['DayOfWeek'] = dates_df['FullDate'].dt.strftime('%w')
-        dates_df['DayOfYear'] = dates_df['FullDate'].dt.strftime('%j')
-        dates_df['Quarter'] = dates_df['FullDate'].dt.quarter
-        dates_df = dates_df.drop(columns=['DateOfSale'])
-        ODS.dimDate_df = pd.concat([dates_df, ODS.dimDate_df])
+        dates_df = pd.read_sql_query("SELECT DateOfSale as FullDate FROM Sale", self.conn)
+        # Need to convert this to a function
+        df = DateHelper().convertDateValues(df=dates_df)
+
+        ODS.dimDate_df = pd.concat([df, ODS.dimDate_df])
         ODS.dimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
         # print(ODS.dimDate_df.to_string())
 
     def parseStoreAddresses(self):
         print("\tParsing SQL Store Addresses")
-        locations_df = pd.read_sql_query("SELECT * FROM Supplier", self.conn)
-        locations_df['StoreID'] = locations_df['SupplierID']
-        locations_df['Address'] = locations_df['SupplierAddress']
-        locations_df['City'] = locations_df['SupplierCity']
-        locations_df['StateProvince'] = locations_df['SupplierStateProvince']
-        locations_df['Country'] = locations_df['SupplierCountry']
-        locations_df['PostCode'] = locations_df['SupplierPostCode']
-        locations_df = locations_df.drop(columns=['SupplierID', 'SupplierAddress', 'SupplierCity',
-                                                  'SupplierStateProvince', 'SupplierCountry', 'SupplierPostCode',
-                                                  'SupplierPhone'])
+        locations_df = pd.read_sql_query("SELECT PostalCode as PostCode, City, State, Country FROM Sale", self.conn)
+        locations_df['AddressID'] = locations_df['PostCode']
+        locations_df['City'] = locations_df['City']
+        locations_df['StateProvince'] = locations_df['State']
+        locations_df['Country'] = locations_df['Country']
+        locations_df = locations_df.drop(columns=['PostCode'])
         ODS.dimStoreAddress_df = pd.concat([locations_df, ODS.dimStoreAddress_df])
-        ODS.dimStoreAddress_df.drop_duplicates(subset='StoreID', keep='first', inplace=True)
+        ODS.dimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
         # print(ODS.dimStoreAddress_df.to_string())
 
     def parseCustomers(self):
         print("\tParsing SQL Customers")
         customer_df = pd.read_sql_query(
-            "SELECT CustomerID, FirstName, SecondName as Surname, CustomerType FROM Customer",
+            "SELECT CustomerID, FirstName, Surname, CustomerType FROM Customer",
             self.conn)
         ODS.dimCustomer_df = pd.concat([customer_df, ODS.dimCustomer_df])
         ODS.dimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
@@ -67,7 +58,7 @@ class ParseSQL:
     def parseProducts(self):
         print("\tParsing SQL Products")
         product_df = pd.read_sql_query(
-            "SELECT ProductID, ProductDescription as ProductName, CategoryID as Category, SupplierPrice as Cost, ProductPrice, SupplierID as StoreID FROM Product",
+            "SELECT ProductID, ProductName, Category, Subcategory, Cost, ProductPrice FROM Product",
             self.conn)
         ODS.dimProduct_df = pd.concat([product_df, ODS.dimProduct_df])
         ODS.dimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
@@ -75,17 +66,19 @@ class ParseSQL:
 
     def parseParentCategories(self):
         print("\tParsing SQL ParentCategories")
-        pCategories_df = pd.read_sql_query("SELECT CategoryID, ParentCategory FROM Category", self.conn)
+        pCategories_df = pd.read_sql_query("SELECT CategoryName, ParentCategory FROM Category", self.conn)
         ODS.dimParentCategory_df = pd.concat([pCategories_df, ODS.dimParentCategory_df])
-        ODS.dimParentCategory_df.drop_duplicates(subset='CategoryID', keep='first', inplace=True)
-        #print(ODS.dimParentCategory_df.to_string())
+        ODS.dimParentCategory_df.drop_duplicates(subset='CategoryName', keep='first', inplace=True)
+        # print(ODS.dimParentCategory_df.to_string())
 
     def parseOrder(self):
         print("\tParsing SQL Orders")
-        internet_sale_item = pd.read_sql_query("SELECT SaleID as OrderID, ProductID, Quantity FROM InternetSaleItem", self.conn)
-        internet_sale = pd.read_sql_query("SELECT SaleID as OrderID, CustomerID, DateOfSale as DateID, SaleAmount FROM InternetSale", self.conn)
-        internet_sale['DateID'] = (pd.to_datetime(internet_sale['DateID'])).dt.strftime('%Y%m%d')
-        new_df = pd.merge(internet_sale_item, internet_sale, left_on='OrderID', right_on='OrderID', how='left')
-        new_df = pd.merge(new_df, ODS.dimProduct_df[['ProductID', 'ProductPrice', 'StoreID']], left_on='ProductID', right_on='ProductID', how='left')
+        sale_item = pd.read_sql_query("SELECT OrderID, ProductID, Quantity FROM SaleItem", self.conn)
+        sale = pd.read_sql_query("SELECT OrderID, CustomerID, DateOfSale as DateID, SaleAmount FROM Sale",
+                                 self.conn)
+        sale['DateID'] = (pd.to_datetime(sale['DateID'])).dt.strftime('%Y%m%d')
+        new_df = pd.merge(sale_item, sale, left_on='OrderID', right_on='OrderID', how='left')
+        new_df = pd.merge(new_df, ODS.dimProduct_df[['ProductID', 'ProductPrice']], left_on='ProductID',
+                          right_on='ProductID', how='left')
         ODS.factOrder_df = pd.concat([new_df, ODS.factOrder_df])
-        #print(ODS.factOrder_df.head().to_string())
+        # print(ODS.factOrder_df.head().to_string())

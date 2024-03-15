@@ -18,7 +18,7 @@ class ODS:
         'CustomerType'
     ])
     dimStoreAddress_df = pd.DataFrame(columns=[
-        'StoreID',
+        'AddressID',
         'Address',
         'City',
         'StateProvince',
@@ -39,12 +39,12 @@ class ODS:
         'ProductID',
         'ProductName',
         'Category',
+        'Subcategory',
         'Cost',
         'ProductPrice',
-        'StoreID'
     ])
     dimParentCategory_df = pd.DataFrame(columns=[
-        'CategoryID',
+        'CategoryName',
         'ParentCategory'
     ])
     factOrder_df = pd.DataFrame(columns=[
@@ -55,5 +55,4 @@ class ODS:
         'SaleAmount',
         'CustomerID',
         'DateID',
-        'StoreID'
     ])
