@@ -19,11 +19,10 @@ class ODS:
     ])
     dimStoreAddress_df = pd.DataFrame(columns=[
         'AddressID',
-        'Address',
         'City',
         'StateProvince',
+        'Region',
         'Country',
-        'PostCode',
     ])
     dimDate_df = pd.DataFrame(columns=[
         'FullDate',

@@ -41,7 +41,7 @@ class ParseSQL:
         locations_df['City'] = locations_df['City']
         locations_df['StateProvince'] = locations_df['State']
         locations_df['Country'] = locations_df['Country']
-        locations_df = locations_df.drop(columns=['PostCode'])
+        locations_df = locations_df.drop(columns=['PostCode', 'State'])
         ODS.dimStoreAddress_df = pd.concat([locations_df, ODS.dimStoreAddress_df])
         ODS.dimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
         # print(ODS.dimStoreAddress_df.to_string())
