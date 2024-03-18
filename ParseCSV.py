@@ -25,8 +25,8 @@ class ParseCSV:
         dates_df = pd.DataFrame(self.sales_df['FullDate'])
         dates_df = DateHelper().convertDateValues(df=dates_df, date_format="%d/%m/%Y")
 
-        ODS.dimDate_df = pd.concat([dates_df, ODS.dimDate_df])
-        ODS.dimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
+        ODS.DimDate_df = pd.concat([ODS.DimDate_df, dates_df])
+        ODS.DimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
 
     def parseCustomers(self):
         print("\tParsing CSV Customers")
@@ -35,9 +35,9 @@ class ParseCSV:
                                     'FirstName': self.sales_df['FirstName'],
                                     'Surname': self.sales_df['Surname'],
                                     'CustomerType': self.sales_df['CustomerType']})
-        ODS.dimCustomer_df = pd.concat([customer_df, ODS.dimCustomer_df])
-        ODS.dimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
-        #print(ODS.dimCustomer_df.to_string())
+        ODS.DimCustomer_df = pd.concat([ODS.DimCustomer_df, customer_df])
+        ODS.DimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
+        #print(ODS.DimCustomer_df.to_string())
 
     def parseStoreAddresses(self):
         print("\tParsing CSV Store Addresses")
@@ -45,11 +45,10 @@ class ParseCSV:
         addresses_df = pd.DataFrame({'AddressID': self.sales_df['AddressID'],
                                      'StateProvince': self.sales_df['StateProvince'],
                                      'Country': self.sales_df['Country'],
-                                     'Region': self.sales_df['Region'],
                                      'City': self.sales_df['City']})
-        ODS.dimStoreAddress_df = pd.concat([addresses_df, ODS.dimStoreAddress_df])
-        ODS.dimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
-        #print(ODS.dimStoreAddress_df.to_string())
+        ODS.DimStoreAddress_df = pd.concat([ODS.DimStoreAddress_df, addresses_df])
+        ODS.DimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
+        #print(ODS.DimStoreAddress_df.to_string())
 
     def parseProducts(self):
         print("\tParsing CSV Products")
@@ -62,9 +61,9 @@ class ParseCSV:
                                     'Subcategory': temp_df['Subcategory'],
                                     'ProductName': temp_df['ProductName']})
 
-        ODS.dimProduct_df = pd.concat([products_df, ODS.dimProduct_df])
-        ODS.dimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
-        #print(ODS.dimProduct_df.to_string())
+        ODS.DimProduct_df = pd.concat([ODS.DimProduct_df, products_df])
+        ODS.DimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
+        #print(ODS.DimProduct_df.to_string())
 
     def parseCategories(self):
         print("\tParsing CSV Categories")
@@ -73,9 +72,9 @@ class ParseCSV:
         cat_df = pd.DataFrame({'CategoryName': temp_df['Subcategory'],
                                'ParentCategory': temp_df['Category']})
 
-        ODS.dimParentCategory_df = pd.concat([cat_df, ODS.dimParentCategory_df])
-        ODS.dimParentCategory_df.drop_duplicates(subset='CategoryName', keep='first', inplace=True)
-        #print(ODS.dimParentCategory_df.to_string())
+        ODS.DimParentCategory_df = pd.concat([ODS.DimParentCategory_df, cat_df])
+        ODS.DimParentCategory_df.drop_duplicates(subset='CategoryName', keep='first', inplace=True)
+        #print(ODS.DimParentCategory_df.to_string())
 
     def parseOrders(self):
         print("\tParsing CSV Orders")
@@ -100,9 +99,9 @@ class ParseCSV:
             "DateID": temp_df["DateID"]
         })
 
-        ODS.factOrder_df = pd.concat([orders_df, ODS.factOrder_df])
-        ODS.factOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
-        #print(ODS.factOrder_df.to_string())
+        ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, orders_df])
+        ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
+
 
 
 

@@ -30,9 +30,9 @@ class ParseSQL:
         # Need to convert this to a function
         df = DateHelper().convertDateValues(df=dates_df)
 
-        ODS.dimDate_df = pd.concat([df, ODS.dimDate_df])
-        ODS.dimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
-        # print(ODS.dimDate_df.to_string())
+        ODS.DimDate_df = pd.concat([ODS.DimDate_df, df])
+        ODS.DimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
+        # print(ODS.DimDate_df.to_string())
 
     def parseStoreAddresses(self):
         print("\tParsing SQL Store Addresses")
@@ -42,34 +42,34 @@ class ParseSQL:
         locations_df['StateProvince'] = locations_df['State']
         locations_df['Country'] = locations_df['Country']
         locations_df = locations_df.drop(columns=['PostCode', 'State'])
-        ODS.dimStoreAddress_df = pd.concat([locations_df, ODS.dimStoreAddress_df])
-        ODS.dimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
-        # print(ODS.dimStoreAddress_df.to_string())
+        ODS.DimStoreAddress_df = pd.concat([ODS.DimStoreAddress_df, locations_df])
+        ODS.DimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
+        # print(ODS.DimStoreAddress_df.to_string())
 
     def parseCustomers(self):
         print("\tParsing SQL Customers")
         customer_df = pd.read_sql_query(
             "SELECT CustomerID, FirstName, Surname, CustomerType FROM Customer",
             self.conn)
-        ODS.dimCustomer_df = pd.concat([customer_df, ODS.dimCustomer_df])
-        ODS.dimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
-        # print(ODS.dimCustomer_df.to_string())
+        ODS.DimCustomer_df = pd.concat([ODS.DimCustomer_df, customer_df])
+        ODS.DimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
+        # print(ODS.DimCustomer_df.to_string())
 
     def parseProducts(self):
         print("\tParsing SQL Products")
         product_df = pd.read_sql_query(
             "SELECT ProductID, ProductName, Category, Subcategory, Cost, ProductPrice FROM Product",
             self.conn)
-        ODS.dimProduct_df = pd.concat([product_df, ODS.dimProduct_df])
-        ODS.dimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
-        # print(ODS.dimProduct_df.to_string())
+        ODS.DimProduct_df = pd.concat([ODS.DimProduct_df, product_df])
+        ODS.DimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
+        # print(ODS.DimProduct_df.to_string())
 
     def parseParentCategories(self):
         print("\tParsing SQL ParentCategories")
         pCategories_df = pd.read_sql_query("SELECT CategoryName, ParentCategory FROM Category", self.conn)
-        ODS.dimParentCategory_df = pd.concat([pCategories_df, ODS.dimParentCategory_df])
-        ODS.dimParentCategory_df.drop_duplicates(subset='CategoryName', keep='first', inplace=True)
-        # print(ODS.dimParentCategory_df.to_string())
+        ODS.DimParentCategory_df = pd.concat([ODS.DimParentCategory_df, pCategories_df])
+        ODS.DimParentCategory_df.drop_duplicates(subset='CategoryName', keep='first', inplace=True)
+        # print(ODS.DimParentCategory_df.to_string())
 
     def parseOrder(self):
         print("\tParsing SQL Orders")
@@ -78,7 +78,10 @@ class ParseSQL:
                                  self.conn)
         sale['DateID'] = (pd.to_datetime(sale['DateID'])).dt.strftime('%Y%m%d')
         new_df = pd.merge(sale_item, sale, left_on='OrderID', right_on='OrderID', how='left')
-        new_df = pd.merge(new_df, ODS.dimProduct_df[['ProductID', 'ProductPrice']], left_on='ProductID',
+        new_df = pd.merge(new_df, ODS.DimProduct_df[['ProductID', 'ProductPrice']], left_on='ProductID',
                           right_on='ProductID', how='left')
-        ODS.factOrder_df = pd.concat([new_df, ODS.factOrder_df])
-        # print(ODS.factOrder_df.head().to_string())
+        new_df['Cost'] = ODS.DimProduct_df['Cost']
+
+        ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, new_df])
+        ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
+

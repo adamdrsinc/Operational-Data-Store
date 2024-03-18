@@ -3,6 +3,7 @@ import pandas as pd
 from ODS import ODS
 from DateHelper import DateHelper
 
+
 class ParseJSON:
     def __init__(self):
         self.addresses_df = None
@@ -29,19 +30,19 @@ class ParseJSON:
 
         self.dates_df = DateHelper().convertDateValues(df=dates_df, date_format="%d/%m/%Y")
 
-        ODS.dimDate_df = pd.concat([self.dates_df, ODS.dimDate_df])
-        ODS.dimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
+        ODS.DimDate_df = pd.concat([ODS.DimDate_df, self.dates_df])
+        ODS.DimDate_df.drop_duplicates(subset='DateID', keep='first', inplace=True)
 
     def parseCustomers(self):
         print("\tParsing JSON Customers")
         sales_df = pd.json_normalize(data=self.data['Sales'])
         customer_df = pd.DataFrame(sales_df['Customer ID'])
-        self.customer_df = customer_df.rename(columns={"Customer ID": "CustomerID"})
+        customer_df = customer_df.rename(columns={"Customer ID": "CustomerID"})
+        self.customer_df = customer_df
 
-        ODS.dimCustomer_df = pd.concat([self.customer_df, ODS.dimCustomer_df])
-        ODS.dimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
-        #print(ODS.dimCustomer_df.to_string())
-
+        ODS.DimCustomer_df = pd.concat([ODS.DimCustomer_df, self.customer_df])
+        ODS.DimCustomer_df.drop_duplicates(subset='CustomerID', keep='first', inplace=True)
+        # print(ODS.DimCustomer_df.to_string())
 
     def parseStoreAddresses(self):
         print("\tParsing JSON Store Addresses")
@@ -54,15 +55,13 @@ class ParseJSON:
             "Country": sales_df['Country']
         })
 
-
-        ODS.dimStoreAddress_df = pd.concat([self.addresses_df, ODS.dimStoreAddress_df])
-        ODS.dimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
-        #print(ODS.dimStoreAddress_df.to_string())
+        ODS.DimStoreAddress_df = pd.concat([ODS.DimStoreAddress_df, self.addresses_df])
+        ODS.DimStoreAddress_df.drop_duplicates(subset='AddressID', keep='first', inplace=True)
+        # print(ODS.DimStoreAddress_df.to_string())
 
     def parseProducts(self):
         print("\tParsing JSON Products")
         sales_df = pd.DataFrame(pd.json_normalize(data=self.data['Sales']))
-
         exploded_df = sales_df.explode('Items')
         items_df = pd.json_normalize(exploded_df['Items'])
         items_df = items_df.rename(columns={"Product ID": "ProductID",
@@ -72,10 +71,9 @@ class ParseJSON:
             "ProductID": items_df["ProductID"],
         })
 
-        ODS.dimProduct_df = pd.concat([self.products_df, ODS.dimProduct_df])
-        ODS.dimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
-        #print(ODS.dimProduct_df.to_string())
-
+        ODS.DimProduct_df = pd.concat([ODS.DimProduct_df, self.products_df])
+        ODS.DimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
+        # print(ODS.DimProduct_df.to_string())
 
     def parseOrders(self):
         print("\tParsing JSON Orders")
@@ -92,6 +90,5 @@ class ParseJSON:
             "DateID": self.dates_df["DateID"]
         })
 
-        ODS.factOrder_df = pd.concat([orders_df, ODS.factOrder_df])
-        ODS.factOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
-        #print(ODS.factOrder_df.to_string())
+        ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, orders_df])
+        ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)

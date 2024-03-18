@@ -6,6 +6,7 @@ warnings.simplefilter(action='ignore', category=UserWarning)
 from ParseSQL import ParseSQL
 from ParseCSV import ParseCSV
 from ParseJSON import ParseJSON
+from ExportODS import ExportODS
 
 
 class DataStoreMain:
@@ -18,6 +19,11 @@ class DataStoreMain:
 
         jsonParser = ParseJSON()
         jsonParser.parseJSON()
+
+        expODS = ExportODS()
+        expODS.buildTables()
+        expODS.cleanODSTables()
+        expODS.exportODS()
 
 
 # Press the green button in the gutter to run the script.

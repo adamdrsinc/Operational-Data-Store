@@ -11,22 +11,21 @@ class ODS:
         'FactOrder'
     ]
 
-    dimCustomer_df = pd.DataFrame(columns=[
+    DimCustomer_df = pd.DataFrame(columns=[
         'CustomerID',
         'FirstName',
         'Surname',
         'CustomerType'
     ])
-    dimStoreAddress_df = pd.DataFrame(columns=[
+    DimStoreAddress_df = pd.DataFrame(columns=[
         'AddressID',
         'City',
         'StateProvince',
-        'Region',
         'Country',
     ])
-    dimDate_df = pd.DataFrame(columns=[
-        'FullDate',
+    DimDate_df = pd.DataFrame(columns=[
         'DateID',
+        'FullDate',
         'Day',
         'Month',
         'Year',
@@ -34,7 +33,7 @@ class ODS:
         'DayOfWeek',
         'Quarter'
     ])
-    dimProduct_df = pd.DataFrame(columns=[
+    DimProduct_df = pd.DataFrame(columns=[
         'ProductID',
         'ProductName',
         'Category',
@@ -42,16 +41,17 @@ class ODS:
         'Cost',
         'ProductPrice',
     ])
-    dimParentCategory_df = pd.DataFrame(columns=[
+    DimParentCategory_df = pd.DataFrame(columns=[
         'CategoryName',
         'ParentCategory'
     ])
-    factOrder_df = pd.DataFrame(columns=[
+    FactOrder_df = pd.DataFrame(columns=[
         'OrderID',
         'ProductID',
         'Quantity',
+        'Cost',
         'ProductPrice',
         'SaleAmount',
         'CustomerID',
-        'DateID',
+        'DateID'
     ])
