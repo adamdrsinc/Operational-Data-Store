@@ -76,11 +76,13 @@ class ParseSQL:
         sale_item = pd.read_sql_query("SELECT OrderID, ProductID, Quantity FROM SaleItem", self.conn)
         sale = pd.read_sql_query("SELECT OrderID, CustomerID, DateOfSale as DateID, SaleAmount FROM Sale",
                                  self.conn)
+        products = pd.read_sql_query("SELECT ProductID, Cost, ProductPrice FROM Product", self.conn)
+
         sale['DateID'] = (pd.to_datetime(sale['DateID'])).dt.strftime('%Y%m%d')
         new_df = pd.merge(sale_item, sale, left_on='OrderID', right_on='OrderID', how='left')
         new_df = pd.merge(new_df, ODS.DimProduct_df[['ProductID', 'ProductPrice']], left_on='ProductID',
                           right_on='ProductID', how='left')
-        new_df['Cost'] = ODS.DimProduct_df['Cost']
+        new_df = pd.merge(new_df, products, on=['ProductID','ProductPrice'], how='left')
 
         ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, new_df])
         ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)

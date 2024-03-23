@@ -71,7 +71,10 @@ class ParseJSON:
             "ProductID": items_df["ProductID"],
         })
 
-        ODS.DimProduct_df = pd.concat([ODS.DimProduct_df, self.products_df])
+        new_df = pd.merge(items_df, ODS.DimProduct_df[['Cost', 'ProductPrice', 'ProductID']], left_on='ProductID',
+                          right_on='ProductID', how='left')
+
+        ODS.DimProduct_df = pd.concat([ODS.DimProduct_df, new_df])
         ODS.DimProduct_df.drop_duplicates(subset='ProductID', keep='first', inplace=True)
         # print(ODS.DimProduct_df.to_string())
 
@@ -90,5 +93,9 @@ class ParseJSON:
             "DateID": self.dates_df["DateID"]
         })
 
-        ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, orders_df])
+        new_df = pd.merge(orders_df, ODS.DimProduct_df[['ProductID', 'Cost', 'ProductPrice']], how='left')
+
+        ODS.FactOrder_df = pd.concat([ODS.FactOrder_df, new_df])
         ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
+
+        print(ODS.FactOrder_df.to_string())

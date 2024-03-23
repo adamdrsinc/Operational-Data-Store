@@ -115,8 +115,6 @@ CREATE TABLE FactOrder(
         ODS.FactOrder_df.drop_duplicates(subset='OrderID', keep='first', inplace=True)
 
         ODS.FactOrder_df = ODS.FactOrder_df[ODS.FactOrder_df['OrderID'].isnull() == False]
-        ODS.FactOrder_df = ODS.FactOrder_df[ODS.FactOrder_df['CustomerID'].isnull() == False]
-        ODS.FactOrder_df = ODS.FactOrder_df[ODS.FactOrder_df['DateID'].isnull() == False]
 
         ODS.DimCustomer_df = ODS.DimCustomer_df[['CustomerID', 'FirstName', 'Surname', 'CustomerType']]
         ODS.DimStoreAddress_df = ODS.DimStoreAddress_df[['AddressID', 'City', 'StateProvince', 'Country']]
@@ -128,7 +126,7 @@ CREATE TABLE FactOrder(
 
     def exportODS(self):
         print("Exporting ODS to SQL")
-        chunksize = 1
+        chunksize = 999
 
         for table in ODS.tables:
             df = getattr(ODS, f"{table}_df")
