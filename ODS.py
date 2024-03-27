@@ -53,5 +53,6 @@ class ODS:
         'ProductPrice',
         'SaleAmount',
         'CustomerID',
-        'DateID'
+        'DateID',
+        'AddressID'
     ])

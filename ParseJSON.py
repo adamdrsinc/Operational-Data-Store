@@ -86,6 +86,7 @@ class ParseJSON:
 
         orders_df = pd.DataFrame({
             "OrderID": sales_df["Order ID"],
+            "AddressID": self.addresses_df["AddressID"],
             "ProductID": self.products_df["ProductID"],
             "Quantity": items_df["Quantity"],
             "SaleAmount": items_df["Sales"],

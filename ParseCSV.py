@@ -93,6 +93,7 @@ class ParseCSV:
 
         orders_df = pd.DataFrame({
             "OrderID": temp_df["OrderID"],
+            "AddressID": self.sales_df["AddressID"],
             "ProductID": temp_df["ProductID"],
             "Quantity": temp_df["Quantity"],
             "SaleAmount": temp_df["SaleAmount"],

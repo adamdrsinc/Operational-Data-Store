@@ -60,10 +60,12 @@ CREATE TABLE FactOrder(
 	SaleAmount nvarchar(20),
 	CustomerID nvarchar(50),
 	DateID nvarchar(20),
+	AddressID nvarchar(20)
 
 	FOREIGN KEY (ProductID) REFERENCES DimProduct(ProductID),
 	FOREIGN KEY (CustomerID) REFERENCES DimCustomer(CustomerID),
-	FOREIGN KEY (DateID) REFERENCES DimDate(DateID)
+	FOREIGN KEY (DateID) REFERENCES DimDate(DateID),
+	FOREIGN KEY (AddressID) REFERENCES DimStoreAddress(AddressID)
 );
 
 
@@ -100,7 +102,7 @@ CREATE TABLE FactOrder(
             values = f"({CSV}"
             SQL = f"\t \t INSERT INTO {table} VALUES {values}".replace("''", 'NULL')
             current = stop
-            print(SQL)
+            #print(SQL)
             self.cursor.execute(SQL)
 
         self.conn.commit()
@@ -116,13 +118,17 @@ CREATE TABLE FactOrder(
 
         ODS.FactOrder_df = ODS.FactOrder_df[ODS.FactOrder_df['OrderID'].isnull() == False]
 
+        ODS.DimStoreAddress_df["AddressID"] = pd.to_numeric(ODS.DimStoreAddress_df["AddressID"], downcast='integer')
         ODS.DimCustomer_df = ODS.DimCustomer_df[['CustomerID', 'FirstName', 'Surname', 'CustomerType']]
         ODS.DimStoreAddress_df = ODS.DimStoreAddress_df[['AddressID', 'City', 'StateProvince', 'Country']]
         ODS.DimDate_df = ODS.DimDate_df[['DateID', 'FullDate', 'Day', 'Month', 'Year', 'DayOfYear', 'DayOfWeek', 'Quarter']]
         ODS.DimProduct_df = ODS.DimProduct_df[['ProductID', 'ProductName', 'Category', 'Subcategory', 'Cost', 'ProductPrice']]
         ODS.DimParentCategory_df = ODS.DimParentCategory_df[['CategoryName', 'ParentCategory']]
         ODS.FactOrder_df = ODS.FactOrder_df[['OrderID', 'ProductID', 'Quantity', 'Cost', 'ProductPrice',
-                                             'SaleAmount', 'CustomerID', 'DateID']]
+                                             'SaleAmount', 'CustomerID', 'DateID', 'AddressID']]
+        ODS.FactOrder_df["AddressID"] = pd.to_numeric(ODS.FactOrder_df["AddressID"], downcast='integer')
+
+        #print(ODS.FactOrder_df.to_string())
 
     def exportODS(self):
         print("Exporting ODS to SQL")
